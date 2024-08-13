@@ -16,67 +16,123 @@ Icon for the app: Modified icon "gear" from Game icon pack by Kenney Vleugels (w
 #### Endless loop
 Endless CPU consuming loop in GUI thread
 ```
-while (true); 
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    ...
+    while (true); // Fault
+    ...
+}
 ```
 
 #### Add endless loop thread
 Add thread with an endless CPU consuming loop
 ```
 unsigned int __stdcall threadLoop(void* data) {
-    while (true);
+    while (true); // Fault
     return 0;
 }
-...
-_beginthreadex(0, 0, &threadLoop, (void*)hWnd, 0, 0);
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    ...
+    _beginthreadex(0, 0, &threadLoop, (void*)hWnd, 0, 0);
+    ...
+}
 ```
 
 #### GUI block 60s
-Delay that prevents the processing of window messages for a longer time
+Delay that prevents the processing of window messages for a longer time (60 Seconds)
 ```
-Sleep(60000);
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    ...
+    Sleep(60000); // Fault
+    ...
+}
 ```
 
 #### Memory leak
 Allocates as much memory as possible without freeing memory. Warning: Your computer may become inoperable as a result!
 ```
-while (true) HWND* phWindow = (HWND*)malloc(sizeof(HWND));
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    ...
+    while (true) HWND* phWindow = (HWND*)malloc(sizeof(HWND)); // Fault
+    ...
+}
 ```
 
 #### GDI leak
 Endless creation of GDI objects
 ```
-while (true) CreateFont(48, 0, 0, 0, FW_DONTCARE, FALSE, TRUE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
-                        CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, L"Arial");
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    ...
+    while (true) CreateFont(48, 0, 0, 0, FW_DONTCARE, FALSE, TRUE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
+                            CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, L"Arial"); // Fault
+    ...
+}
 ```
 
 #### Handle leak
 Endless creation of handles
 ```
-while (true) OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId()); 
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    ...
+    while (true) OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId()); // Fault
+    ...
+} 
 ```
 
 #### Thread spam
 Creates as much threads as possible
 ```
-while (true) _beginthreadex(0, 0, &threadWaitForever, (void*)hWnd, 0, 0); 
+HANDLE g_semaphore = NULL;
+unsigned int __stdcall threadWaitForever(void* data) {
+    WaitForSingleObject(g_semaphore, INFINITE);
+    return 0;
+}
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    ...
+    while (true) _beginthreadex(0, 0, &threadWaitForever, (void*)hWnd, 0, 0); // Fault
+    ...
+}
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
+                     _In_opt_ HINSTANCE hPrevInstance,
+                     _In_ LPWSTR    lpCmdLine,
+                     _In_ int       nCmdShow)
+{
+    ...
+    g_semaphore = CreateSemaphore(NULL, 0, 1, NULL);
+    ...
+}
 ```
 
 #### Write to NULL-pointer
 Write to address 0
 ```
-char* pszTest = NULL;
-...
-pszTest[0] = ' ';
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    char* pszTest = NULL;
+    ...
+    pszTest[0] = ' '; // Fault
+    ...
+}
 ```
 
 #### Free of non allocated memory
 Free memory that is not allocated
 ```
-char* pszTest = NULL;
-...
-pszTest = (char*)malloc(sizeof(char));
-free(pszTest);
-free(pszTest); // Fault
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    char* pszTest = NULL;
+    ...
+    pszTest = (char*)malloc(sizeof(char));
+    free(pszTest);
+    free(pszTest); // Fault
+    ...
+}
 ```
 
 ### Development environment
