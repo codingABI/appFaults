@@ -55,4 +55,7 @@
       <Filter>Ressourcendateien</Filter>
     </Image>
   </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="appFaults.manifest" />
+  </ItemGroup>
 </Project>

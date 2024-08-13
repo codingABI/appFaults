@@ -15,6 +15,7 @@
 
   History:
   20240810, Initial version
+  20240813, Remove unneeded spaces, Change manifest for dpi PerMonitorV2
 
 ===================================================================+*/
 
@@ -249,16 +250,16 @@ void resizeControls(HWND hWindow) {
     int iClientWidth = rectWindow.right;
     int iClientHeight = rectWindow.bottom;
 
-    // Set icons for window caption
+    // Set icons for window caption (aligned on https://learn.microsoft.com/en-us/previous-versions/windows/desktop/mpc/creating-a-dpi-aware-application)
     if (uDpi >= 192) {
-        SendMessage(hWindow, WM_SETICON, ICON_SMALL, (LONG)(ULONG_PTR)LoadImage(g_hInst, MAKEINTRESOURCE(IDI_APPICON64), IMAGE_ICON, 64, 64, LR_DEFAULTCOLOR | LR_SHARED));
+        SendMessage(hWindow, WM_SETICON, ICON_BIG, (LONG)(ULONG_PTR)LoadImage(g_hInst, MAKEINTRESOURCE(IDI_APPICON64), IMAGE_ICON, 64, 64, LR_DEFAULTCOLOR | LR_SHARED));
+        SendMessage(hWindow, WM_SETICON, ICON_SMALL, (LONG)(ULONG_PTR)LoadImage(g_hInst, MAKEINTRESOURCE(IDI_APPICON32), IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR | LR_SHARED));
+    } else if (uDpi >= 144) {
+        SendMessage(hWindow, WM_SETICON, ICON_BIG, (LONG)(ULONG_PTR)LoadImage(g_hInst, MAKEINTRESOURCE(IDI_APPICON48), IMAGE_ICON, 48, 48, LR_DEFAULTCOLOR | LR_SHARED));
+        SendMessage(hWindow, WM_SETICON, ICON_SMALL, (LONG)(ULONG_PTR)LoadImage(g_hInst, MAKEINTRESOURCE(IDI_APPICON32), IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR | LR_SHARED));
     } else {
-        if (uDpi >= 144) {
-            SendMessage(hWindow, WM_SETICON, ICON_SMALL, (LONG)(ULONG_PTR)LoadImage(g_hInst, MAKEINTRESOURCE(IDI_APPICON32), IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR | LR_SHARED));
-        }
-        else {
-            SendMessage(hWindow, WM_SETICON, ICON_SMALL, (LONG)(ULONG_PTR)LoadImage(g_hInst, MAKEINTRESOURCE(IDI_APPICON16), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR | LR_SHARED));
-        }
+        SendMessage(hWindow, WM_SETICON, ICON_BIG, (LONG)(ULONG_PTR)LoadImage(g_hInst, MAKEINTRESOURCE(IDI_APPICON32), IMAGE_ICON, 32, 32, LR_DEFAULTCOLOR | LR_SHARED));
+        SendMessage(hWindow, WM_SETICON, ICON_SMALL, (LONG)(ULONG_PTR)LoadImage(g_hInst, MAKEINTRESOURCE(IDI_APPICON16), IMAGE_ICON, 16, 16, LR_DEFAULTCOLOR | LR_SHARED));
     }
 
     // Update automatic size of status bar
@@ -269,8 +270,8 @@ void resizeControls(HWND hWindow) {
     ncm.cbSize = sizeof(NONCLIENTMETRICS);
     SystemParametersInfo(SPI_GETNONCLIENTMETRICS, sizeof(NONCLIENTMETRICS), &ncm, 0);
 
-    // Scale font size to x1.5
-    ncm.lfMenuFont.lfHeight = 1.5f * (float) MulDiv(g_iFontHeight_96DPI, uDpi, USER_DEFAULT_SCREEN_DPI);
+    // Scale font size to x1.5 (I am getting old...)
+    ncm.lfMenuFont.lfHeight = 3 * MulDiv(g_iFontHeight_96DPI, uDpi, USER_DEFAULT_SCREEN_DPI) / 2;
 
     if (g_hFont != NULL) DeleteObject(g_hFont); // Prevents GDI leak
     g_hFont = CreateFontIndirect(&ncm.lfMenuFont);
@@ -334,7 +335,7 @@ void createControls(HWND hWindow)
         HWND hwndButton = CreateWindow(
             L"BUTTON",
             LoadStringAsWstr(g_hInst, g_autoButtons[i].dwResourceStringID).c_str(),
-            WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_TEXT,
+            WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_TEXT | BS_VCENTER,
             0, 0, 0, 0, // Size will be set later
             hWindow,
             (HMENU)(g_autoButtons[i].dwResourceID),
@@ -388,6 +389,8 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
+
+    SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
 
     MyRegisterClass(hInstance);
 

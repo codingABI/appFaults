@@ -81,6 +81,10 @@
       <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
+    <Manifest>
+      <AdditionalManifestFiles>
+      </AdditionalManifestFiles>
+    </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
@@ -99,7 +103,8 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Manifest>
-      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+      <AdditionalManifestFiles>
+      </AdditionalManifestFiles>
     </Manifest>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -114,12 +119,16 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Manifest>
-      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+      <AdditionalManifestFiles>
+      </AdditionalManifestFiles>
     </Manifest>
     <CustomBuildStep>
-      <Command>"$(FrameworkSDKDir)\bin\10.0.22621.0\x64\signtool.exe" sign /n "codingABI" /tr "http://timestamp.digicert.com" /td SHA256 /fd SHA256 "$(TargetPath)" &gt; "$(OutDir)sign\$(ProjectName)-sign.out"</Command>
-      <Message>Signing $(TargetPath)</Message>
-      <Outputs>$(OutDir)sign\$(ProjectName)-sign.out</Outputs>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+      <Outputs>
+      </Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -139,12 +148,16 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
     </Link>
     <Manifest>
-      <EnableDpiAwareness>PerMonitorHighDPIAware</EnableDpiAwareness>
+      <AdditionalManifestFiles>
+      </AdditionalManifestFiles>
     </Manifest>
     <CustomBuildStep>
-      <Command>"$(FrameworkSDKDir)\bin\10.0.26100.0\x64\signtool.exe" sign /n "codingABI" /tr "http://timestamp.digicert.com" /td SHA256 /fd SHA256 "$(TargetPath)" &gt; "$(OutDir)sign\$(ProjectName)-sign.out"</Command>
-      <Message>Signing $(TargetPath)</Message>
-      <Outputs>$(OutDir)sign\$(ProjectName)-sign.out</Outputs>
+      <Command>
+      </Command>
+      <Message>
+      </Message>
+      <Outputs>
+      </Outputs>
     </CustomBuildStep>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -165,6 +178,9 @@
     <Image Include="gear32.ico" />
     <Image Include="gear48.ico" />
     <Image Include="gear64.ico" />
+  </ItemGroup>
+  <ItemGroup>
+    <Manifest Include="appFaults.manifest" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
