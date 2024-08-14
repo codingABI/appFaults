@@ -14,7 +14,7 @@ Icon for the app: Modified icon "gear" from Game icon pack by Kenney Vleugels (w
 ### Programming errors/Faults
 
 #### Endless loop
-Endless CPU consuming loop in GUI thread
+Endless CPU consuming, GUI freezing loop
 ```
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -42,7 +42,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 ```
 
 #### Deadlock
-Waits forever for a seamaphore
+Waits forever for a seamaphore and freeze GUI while waiting
 ```
 HANDLE g_semaphore = NULL;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
@@ -64,7 +64,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 ```
 
 #### External process deadlock
-Waits forever for an external process (for example cmd.exe)
+Waits forever for an external process (for example **cmd.exe***) and freeze GUI while waiting
 ```
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -80,7 +80,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 ```
 
 #### GUI block 60s
-Delay that prevents the processing of window messages for a longer time (60 Seconds)
+Delay that prevents the processing of window messages (=> Freeze GUI) for a longer time (60 Seconds)
 ```
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -92,7 +92,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 ```
 
 #### Memory leak
-Allocates as much memory as possible without freeing memory. Warning: Your computer may become inoperable as a result!
+Allocates as much memory as possible without freeing memory and freeze GUI. Warning: Your computer may become inoperable as a result!
 ```
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -105,7 +105,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 ```
 
 #### GDI leak
-Endless creation of GDI objects
+Endless creation of GDI objects and freeze GUI.
 ```
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -118,7 +118,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 ```
 
 #### Handle leak
-Endless creation of handles
+Endless creation of handles and freeze GUI.
 ```
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -130,7 +130,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 ```
 
 #### Thread spam
-Creates as much threads as possible
+Creates as much threads as possible and freeze GUI.
 ```
 HANDLE g_semaphore = NULL;
 unsigned int __stdcall threadWaitForever(void* data) {
