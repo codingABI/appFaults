@@ -63,7 +63,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 }
 ```
 
-#### External proecess dead lock
+#### External proecess deadlock
 Waits forever for an external process (for example cmd.exe)
 ```
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
