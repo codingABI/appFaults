@@ -19,8 +19,9 @@ Endless CPU consuming loop in GUI thread
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     ...
-    while (true); // Fault
-    ...
+    case IDM_LOOP:
+        while (true); // Fault
+        ...
 }
 ```
 
@@ -34,9 +35,48 @@ unsigned int __stdcall threadLoop(void* data) {
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     ...
-    _beginthreadex(0, 0, &threadLoop, (void*)hWnd, 0, 0);
+    case IDM_LOOPTHREAD:
+        _beginthreadex(0, 0, &threadLoop, (void*)hWnd, 0, 0);
+        ...
+}
+```
+
+#### Deadlock
+Waits forever for a seamaphore
+```
+HANDLE g_semaphore = NULL;
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    ...
+    case IDM_DEADLOCK:
+        WaitForSingleObject(g_semaphore, INFINITE);
+        ...
+}
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
+                     _In_opt_ HINSTANCE hPrevInstance,
+                     _In_ LPWSTR    lpCmdLine,
+                     _In_ int       nCmdShow)
+{
+    ...
+    g_semaphore = CreateSemaphore(NULL, 0, 1, NULL);
     ...
 }
+```
+
+#### External proecess dead lock
+Waits forever for an external process (for example cmd.exe)
+```
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    ...
+    case IDM_EXTERNALDEADLOCK: {
+        ...
+        wchar_t szCommand[] = L"cmd.exe";
+        ...    
+        if (CreateProcess(NULL, szCommand, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+            // Wait until child process exits.
+            WaitForSingleObject(pi.hProcess, INFINITE); // Fault, because the external process is long running and we wait in WndProc
+            ...    
 ```
 
 #### GUI block 60s
@@ -45,8 +85,9 @@ Delay that prevents the processing of window messages for a longer time (60 Seco
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     ...
-    Sleep(60000); // Fault
-    ...
+    case IDM_LOCK10S:
+        Sleep(60000); // Fault
+        ...
 }
 ```
 
@@ -56,8 +97,10 @@ Allocates as much memory as possible without freeing memory. Warning: Your compu
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     ...
-    while (true) HWND* phWindow = (HWND*)malloc(sizeof(HWND)); // Fault
-    ...
+    case IDM_MEMORYLEAK:
+        ...
+        while (true) HWND* phWindow = (HWND*)malloc(sizeof(HWND)); // Fault
+        ...
 }
 ```
 
@@ -67,9 +110,10 @@ Endless creation of GDI objects
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     ...
-    while (true) CreateFont(48, 0, 0, 0, FW_DONTCARE, FALSE, TRUE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
-                            CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, L"Arial"); // Fault
-    ...
+    case IDM_GDILEAK:
+        while (true) CreateFont(48, 0, 0, 0, FW_DONTCARE, FALSE, TRUE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
+                                CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, L"Arial"); // Fault
+        ...
 }
 ```
 
@@ -79,8 +123,9 @@ Endless creation of handles
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     ...
-    while (true) OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId()); // Fault
-    ...
+    case IDM_HANDLELEAK:
+        while (true) OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId()); // Fault
+        ...
 } 
 ```
 
@@ -116,7 +161,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     char* pszTest = NULL;
     ...
-    pszTest[0] = ' '; // Fault
+    case IDM_NULLACCESS:
+        pszTest[0] = ' '; // Fault
     ...
 }
 ```
@@ -128,10 +174,11 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     char* pszTest = NULL;
     ...
-    pszTest = (char*)malloc(sizeof(char));
-    free(pszTest);
-    free(pszTest); // Fault
-    ...
+    case IDM_FREEINVALID:
+        pszTest = (char*)malloc(sizeof(char));
+        free(pszTest);
+        free(pszTest); // Fault
+        ...
 }
 ```
 
