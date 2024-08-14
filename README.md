@@ -193,7 +193,7 @@ The compiled EXE files are digitally signed with my public key
 ### FAQ
 
 #### Why task manager starts every time appFaults is started?
-**taskmgr.exe** is started by default, because this tool can be helpfull.
+**taskmgr.exe** is started by default, because this tool can be helpfull in combination with appFaults.
 
 #### Why cmd.exe starts?
-**cmd.exe** is started for fault [External process deadlock](#external-process-deadlock) as an example for an external process that locks appFaults. 
+**cmd.exe** is started for fault [External process deadlock](#external-process-deadlock) as an example for an external process that could locks appFaults. 
