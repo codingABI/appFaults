@@ -196,4 +196,4 @@ The compiled EXE file is digitally signed with my public key
 **taskmgr.exe** is started by default, because this tool can be helpfull.
 
 #### Why cmd.exe starts?
-**cmd.exe** is started for fault [External process deadlock](#external-process-deadlock) as an example for an exernal process that locks appFaults. 
+**cmd.exe** is started for fault [External process deadlock](#external-process-deadlock) as an example for an external process that locks appFaults. 
