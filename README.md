@@ -64,7 +64,7 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 ```
 
 #### External process deadlock
-Waits forever for an external process (for example **cmd.exe***) and freeze GUI while waiting
+Waits forever for an external process (for example **cmd.exe**) and freeze GUI while waiting
 ```
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
