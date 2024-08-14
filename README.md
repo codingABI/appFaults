@@ -42,7 +42,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 ```
 
 #### Deadlock
-Waits forever for a seamaphore and freeze GUI while waiting
+Waits forever for a semaphore and freeze GUI while waiting
 ```
 HANDLE g_semaphore = NULL;
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
