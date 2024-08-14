@@ -19,7 +19,9 @@
 #define IDS_APPWARNING                  118
 #define IDS_LOOPTHREADS                 119
 #define IDS_MEMORYLEAKWARING            120
-#define IDI_APPICON48                   121
+#define IDS_DEADLOCK                    121
+#define IDS_EXTERNALDEADLOCK            122
+#define IDI_APPICON48                   123
 #define IDR_MAINFRAME                   128
 #define IDC_STATUSBAR                   1000
 #define IDC_TOOLBAR                     1001
@@ -33,6 +35,8 @@
 #define IDM_FREEINVALID                 1009
 #define IDM_NULLACCESS                  1010
 #define IDM_ABOUT                       1011
+#define IDM_DEADLOCK                    1012
+#define IDM_EXTERNALDEADLOCK            1013
 #define IDC_STATIC                      -1
 
 // Next default values for new objects

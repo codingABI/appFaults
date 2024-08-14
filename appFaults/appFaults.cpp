@@ -16,6 +16,7 @@
   History:
   20240810, Initial version
   20240813, Remove unneeded spaces, Change manifest for dpi PerMonitorV2
+  20240814, Add deadlock
 
 ===================================================================+*/
 
@@ -32,21 +33,23 @@
 #pragma comment(lib,"shcore.lib")
 #pragma comment(lib,"Version.lib")
 
-// Default sizes for some control in 96 dpi
+// Windows size in 96 dpi
 #define WINDOWWIDTH_96DPI 400
 #define WINDOWHEIGHT_96DPI 480
 
 // Struct for an automatically generated button
 typedef struct {
-    PVOID  dwResourceID; // Resource ID for button
+    PVOID dwResourceID; // Resource ID for button
     DWORD dwResourceStringID; // Resource string as button text
 } AUTOBUTTON;
 
 // List of automatically generated buttons
-#define MAXAUTOBUTTONS 9
+#define MAXAUTOBUTTONS 11
 AUTOBUTTON g_autoButtons[MAXAUTOBUTTONS] = {
     { (PVOID) IDM_LOOP,IDS_LOOP },
     { (PVOID) IDM_LOOPTHREAD,IDS_LOOPTHREAD},
+    { (PVOID) IDM_DEADLOCK,IDS_DEADLOCK },
+    { (PVOID) IDM_EXTERNALDEADLOCK,IDS_EXTERNALDEADLOCK },
     { (PVOID) IDM_LOCK10S,IDS_LOCK10S },
     { (PVOID) IDM_MEMORYLEAK,IDS_MEMORYLEAK },
     { (PVOID) IDM_HANDLELEAK,IDS_HANDLELEAK },
@@ -290,7 +293,7 @@ void resizeControls(HWND hWindow) {
         - MAXAUTOBUTTONS * MulDiv(iButtonHeight_96DPI, uDpi, USER_DEFAULT_SCREEN_DPI)) / (MAXAUTOBUTTONS + 1);
     int iPosY = iMargin;
     for (int i = 0; i < MAXAUTOBUTTONS; i++) {
-        HWND hButton = GetDlgItem(hWindow, IDM_LOOP + i);
+        HWND hButton = GetDlgItem(hWindow, (int) g_autoButtons[i].dwResourceID);
         if (hButton != NULL) {
             // Set font for button
             SendMessage(hButton, WM_SETFONT, (WPARAM)g_hFont, MAKELPARAM(TRUE, 0));
@@ -472,7 +475,7 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
 
   Returns:  BOOL
               TRUE = success
-              FALSe = error
+              FALSE = error
 
 -----------------------------------------------------------------F-F*/
 BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
@@ -555,6 +558,41 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 case IDM_THREADSPAM:
                     while (true) _beginthreadex(0, 0, &threadWaitForever, (void*)hWnd, 0, 0); // Fault
                     break;
+                case IDM_DEADLOCK:
+                    WaitForSingleObject(g_semaphore, INFINITE); // Fault
+                    break;
+                case IDM_EXTERNALDEADLOCK: {
+                    STARTUPINFO si;
+                    PROCESS_INFORMATION pi;
+                    wchar_t szCommand[] = L"cmd.exe";
+
+                    ZeroMemory(&si, sizeof(si));
+                    si.cb = sizeof(si);
+                    ZeroMemory(&pi, sizeof(pi));
+
+                    // Start the child process. 
+                    if (CreateProcess(NULL,   // No module name (use command line)
+                        szCommand,        // Command line
+                        NULL,           // Process handle not inheritable
+                        NULL,           // Thread handle not inheritable
+                        FALSE,          // Set handle inheritance to FALSE
+                        0,              // No creation flags
+                        NULL,           // Use parent's environment block
+                        NULL,           // Use parent's starting directory 
+                        &si,            // Pointer to STARTUPINFO structure
+                        &pi)           // Pointer to PROCESS_INFORMATION structure
+                        )
+                    {
+                        // Wait until child process exits.
+                        WaitForSingleObject(pi.hProcess, INFINITE);
+
+                        // Close process and thread handles. 
+                        CloseHandle(pi.hProcess);
+                        CloseHandle(pi.hThread);
+                    }
+
+                    break;
+                }
                 case IDM_LOCK10S:
                     Sleep(60000); // Fault
                     break;
