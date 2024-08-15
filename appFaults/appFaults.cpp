@@ -22,7 +22,7 @@
 ===================================================================+*/
 
 #include "framework.h"
-#include "appFaults.h"
+#include "resource.h"
 #include <string>
 #include <commctrl.h>
 #include <shellapi.h>
