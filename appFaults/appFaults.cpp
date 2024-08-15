@@ -78,7 +78,7 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
  /*F+F+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
    Function: MyGetDpiForWindow
 
-   Summary:  Returns the current DPI value for the a window
+   Summary:  Returns the current DPI value for a window
 
    I had a problem with the built in GetDpiForWindow function.
    When I use this function and run the program on Windows 2012R2 the program does not start and I will get the message
@@ -443,7 +443,6 @@ void createControls(HWND hWindow)
         (HMENU)IDC_PROGRESSBAR,
         g_hInst,
         (LPVOID)NULL);
-    SendMessage(g_hProgressBar, PBM_SETMARQUEE, (WPARAM)1, 0);
 
     // Sysmenu entry
     HMENU hSysMenu = GetSystemMenu(hWindow, FALSE);
