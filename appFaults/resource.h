@@ -25,18 +25,20 @@
 #define IDR_MAINFRAME                   128
 #define IDC_STATUSBAR                   1000
 #define IDC_TOOLBAR                     1001
-#define IDM_LOOP                        1002
-#define IDM_LOOPTHREAD                  1003
-#define IDM_LOCK10S                     1004
-#define IDM_MEMORYLEAK                  1005
-#define IDM_HANDLELEAK                  1006
-#define IDM_GDILEAK                     1007
-#define IDM_THREADSPAM                  1008
-#define IDM_FREEINVALID                 1009
-#define IDM_NULLACCESS                  1010
-#define IDM_ABOUT                       1011
-#define IDM_DEADLOCK                    1012
-#define IDM_EXTERNALDEADLOCK            1013
+#define IDC_PROGRESSBAR                 1002
+#define IDM_LOOP                        1003
+#define IDM_LOOPTHREAD                  1004
+#define IDM_LOCK10S                     1005
+#define IDM_MEMORYLEAK                  1006
+#define IDM_HANDLELEAK                  1007
+#define IDM_GDILEAK                     1008
+#define IDM_THREADSPAM                  1009
+#define IDM_FREEINVALID                 1010
+#define IDM_NULLACCESS                  1011
+#define IDM_ABOUT                       1012
+#define IDM_DEADLOCK                    1013
+#define IDM_EXTERNALDEADLOCK            1014
+#define IDT_TIMER250MS                  1015
 #define IDC_STATIC                      -1
 
 // Next default values for new objects

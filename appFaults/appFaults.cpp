@@ -17,6 +17,7 @@
   20240810, Initial version
   20240813, Remove unneeded spaces, Change manifest for dpi PerMonitorV2
   20240814, Add deadlock
+  20240814, Add progress bar to show "GUI is alive"
 
 ===================================================================+*/
 
@@ -32,10 +33,6 @@
 #pragma comment(lib,"comctl32.lib")
 #pragma comment(lib,"shcore.lib")
 #pragma comment(lib,"Version.lib")
-
-// Windows size in 96 dpi
-#define WINDOWWIDTH_96DPI 400
-#define WINDOWHEIGHT_96DPI 480
 
 // Struct for an automatically generated button
 typedef struct {
@@ -59,11 +56,16 @@ AUTOBUTTON g_autoButtons[MAXAUTOBUTTONS] = {
     { (PVOID) IDM_NULLACCESS,IDS_NULLACCESS}
 };
 
+// Windows size in 96 dpi
+#define WINDOWWIDTH_96DPI 400
+#define WINDOWHEIGHT_96DPI (50*MAXAUTOBUTTONS)
+
 // Global variables
 HINSTANCE g_hInst;
 int g_iFontHeight_96DPI = -12;
 HFONT g_hFont = NULL;
 HWND g_hStatusBar = NULL;
+HWND g_hProgressBar = NULL;
 HANDLE g_semaphore = NULL;
 HWND g_hLastFocus = NULL;
 HWND g_hWnd = NULL;
@@ -73,13 +75,24 @@ ATOM                MyRegisterClass(HINSTANCE hInstance);
 BOOL                InitInstance(HINSTANCE, int);
 LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
 
-/*
- * I had a problem with the built in GetDpiForWindow function.
- * When I use this function and run the program on Windows 2012R2 the program does not start and I will get the message
- * 'Der Prozedureinsprungpunkt "GetDpiForWindow" wurde in der DLL "...exe" nicht gefunden. '
- * a.k.a. 'The procedure entry point "GetDpiForWindow" could not be located in the dynamic link library "...exe"'
- * My workaround is MyGetDpiForWindow
- */
+ /*F+F+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   Function: MyGetDpiForWindow
+
+   Summary:  Returns the current DPI value for the a window
+
+   I had a problem with the built in GetDpiForWindow function.
+   When I use this function and run the program on Windows 2012R2 the program does not start and I will get the message
+   'Der Prozedureinsprungpunkt "GetDpiForWindow" wurde in der DLL "...exe" nicht gefunden. '
+   a.k.a. 'The procedure entry point "GetDpiForWindow" could not be located in the dynamic link library "...exe"'
+   My workaround is MyGetDpiForWindow
+   
+   Args:     WND hWindow
+               Handle to window
+
+   Returns:  UINT
+               DPI for window
+
+ -----------------------------------------------------------------F-F*/
 UINT MyGetDpiForWindow(HWND hWindow) {
     UINT uDpi = 96; // Failback value, if GetDpiForWindow could not be used
 
@@ -93,6 +106,49 @@ UINT MyGetDpiForWindow(HWND hWindow) {
     if (GetDpiForWindow == nullptr)
         return uDpi;
     return(GetDpiForWindow(hWindow));
+}
+
+/*
+ * I had a problem with the built in GetSystemMetricsForDpi function.
+ * When I use this function and run the program on Windows 2012R2 the program does not start and I will get the message
+ * 'Der Prozedureinsprungpunkt "GetSystemMetricsForDpi" wurde in der DLL "...exe" nicht gefunden. '
+ * a.k.a. 'The procedure entry point "GetSystemMetricsForDpi" could not be located in the dynamic link library "...exe"'
+ * My workaround is MyGetSystemMetricsForDpi
+ */
+
+ /*F+F+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+   Function: MyGetSystemMetricsForDpi
+
+   Summary:  Returns size of System metric or configuration setting dependent on DPI
+
+   I had a problem with the built in GetSystemMetricsForDpi function.
+   When I use this function and run the program on Windows 2012R2 the program does not start and I will get the message
+   'Der Prozedureinsprungpunkt "GetSystemMetricsForDpi" wurde in der DLL "...exe" nicht gefunden. '
+   a.k.a. 'The procedure entry point "GetSystemMetricsForDpi" could not be located in the dynamic link library "...exe"'
+   My workaround is MyGetSystemMetricsForDpi
+
+   Args:     
+             int nIndex
+               System metric or configuration setting
+             UINT dpi
+               DPI value
+
+   Returns:  int
+               Size for the system metric or configuration setting
+               0 = error
+
+ -----------------------------------------------------------------F-F*/
+int MyGetSystemMetricsForDpi(int nIndex, UINT dpi) {
+    int iMetrics = GetSystemMetrics(nIndex); // Failback value, if GetSystemMetricsForDpi could not be used
+
+    int (__stdcall *GetSystemMetricsForDpi)(int nIndex, UINT dpi) = nullptr;
+    HMODULE hDLL = GetModuleHandle(L"user32.dll");
+    if (hDLL == NULL)
+        return iMetrics;
+    *reinterpret_cast<FARPROC*>(&GetSystemMetricsForDpi) = GetProcAddress(hDLL, "GetSystemMetricsForDpi");
+    if (GetSystemMetricsForDpi == nullptr)
+        return iMetrics;
+    return(GetSystemMetricsForDpi(nIndex, dpi));
 }
 
 /*F+F+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -246,6 +302,7 @@ void resizeControls(HWND hWindow) {
     // Check handles
     if (hWindow == NULL) return;
     if (g_hStatusBar == NULL) return;
+    if (g_hProgressBar == NULL) return;
 
     // Get height/width of window inner area
     RECT rectWindow{ 0,0,0,0 };
@@ -290,8 +347,10 @@ void resizeControls(HWND hWindow) {
     // Resize automatically generated buttons
     int iButtonHeight_96DPI = MulDiv(HIWORD(units), 14, 8);
     int iMargin = ((iClientHeight - iStatusBarHeight) 
-        - MAXAUTOBUTTONS * MulDiv(iButtonHeight_96DPI, uDpi, USER_DEFAULT_SCREEN_DPI)) / (MAXAUTOBUTTONS + 1);
-    int iPosY = iMargin;
+        - MAXAUTOBUTTONS * MulDiv(iButtonHeight_96DPI, uDpi, USER_DEFAULT_SCREEN_DPI))
+        / (MAXAUTOBUTTONS + 1);
+    int iPosY = iMargin + (iClientHeight - iStatusBarHeight -
+        (MAXAUTOBUTTONS * (iMargin + MulDiv(iButtonHeight_96DPI, uDpi, USER_DEFAULT_SCREEN_DPI)) + iMargin)) / 2;
     for (int i = 0; i < MAXAUTOBUTTONS; i++) {
         HWND hButton = GetDlgItem(hWindow, (int) g_autoButtons[i].dwResourceID);
         if (hButton != NULL) {
@@ -307,6 +366,18 @@ void resizeControls(HWND hWindow) {
             iPosY += iMargin + MulDiv(iButtonHeight_96DPI, uDpi, USER_DEFAULT_SCREEN_DPI);
         }
     }
+
+    // Progress bar
+    int iProgressBarWidth = iClientWidth / 4;
+    int iProgressBarHeight = iStatusBarHeight - MyGetSystemMetricsForDpi(SM_CYDLGFRAME, uDpi) * 2;
+    int iProgressBarX = iClientWidth - iProgressBarWidth - MyGetSystemMetricsForDpi(SM_CXDLGFRAME, uDpi);
+    int iProgressBarY = iClientHeight - iStatusBarHeight + MyGetSystemMetricsForDpi(SM_CYDLGFRAME, uDpi);
+    SetWindowPos(g_hProgressBar, 0,
+        iProgressBarX,
+        iProgressBarY,
+        iProgressBarWidth,
+        iProgressBarHeight,
+        SWP_NOZORDER);
     
     InvalidateRect(hWindow, NULL, TRUE); // Force window content update
 }
@@ -361,6 +432,18 @@ void createControls(HWND hWindow)
         (HMENU)IDC_STATUSBAR,
         g_hInst,
         (LPVOID)NULL);
+
+    // Progress bar as alive signal
+    g_hProgressBar = CreateWindow(
+        PROGRESS_CLASS,
+        (LPTSTR)NULL,
+        WS_CHILD | WS_VISIBLE | PBS_SMOOTH,
+        0, 0, 0, 0, // Size will be set later
+        hWindow,
+        (HMENU)IDC_PROGRESSBAR,
+        g_hInst,
+        (LPVOID)NULL);
+    SendMessage(g_hProgressBar, PBM_SETMARQUEE, (WPARAM)1, 0);
 
     // Sysmenu entry
     HMENU hSysMenu = GetSystemMenu(hWindow, FALSE);
@@ -584,7 +667,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         )
                     {
                         // Wait until child process exits.
-                        WaitForSingleObject(pi.hProcess, INFINITE);
+                        WaitForSingleObject(pi.hProcess, INFINITE); // Fault
 
                         // Close process and thread handles. 
                         CloseHandle(pi.hProcess);
@@ -631,6 +714,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         resizeWindow(hWnd,NULL);
         resizeControls(hWnd);
         SendMessage(g_hStatusBar, SB_SETTEXT, 0, (LPARAM)LoadStringAsWstr(g_hInst, IDS_APPWARNING).c_str());
+        SetTimer(hWnd, IDT_TIMER250MS, 250, (TIMERPROC)NULL);
         break;
     case WM_DPICHANGED:
         resizeWindow(hWnd,(RECT*)lParam);
@@ -639,6 +723,14 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     case WM_DESTROY:
         PostQuitMessage(0);
         break;
+    case WM_TIMER:
+        switch (wParam) {
+            case IDT_TIMER250MS:
+                SendMessage(g_hProgressBar, PBM_STEPIT, 0, 0);
+                break;
+        }
+        break;
+
     default:
         return DefWindowProc(hWnd, message, wParam, lParam);
     }
