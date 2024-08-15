@@ -49,7 +49,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     ...
     case IDM_DEADLOCK:
-        WaitForSingleObject(g_semaphore, INFINITE);
+        WaitForSingleObject(g_semaphore, INFINITE); // Fault
         ...
 }
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
