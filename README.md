@@ -198,5 +198,5 @@ The compiled EXE files are digitally signed with my public key
 #### Why cmd.exe starts?
 **cmd.exe** is started for fault [External process deadlock](#external-process-deadlock) as an example for an external process that could locks appFaults. 
 
-### What is the purpose of the progress bar in the bottom right-hand corner of the window?
+#### What is the purpose of the progress bar in the bottom right-hand corner of the window?
 The progress bar is used as an indicator, that the GUI is responding. When the GUI freezes by an application fault the progress bar stops.
