@@ -13,6 +13,18 @@ Icon for the app: Modified icon "gear" from Game icon pack by Kenney Vleugels (w
 
 ### Programming errors/Faults
 
+  - [Endless loop](#endless-loop)
+  - [Add endless loop thread](#add-endless-loop-thread)
+  - [Deadlock](#deadlock)
+  - [External process deadlock](#external-process-deadlock)
+  - [GUI block 60s](#gui-block-60s)
+  - [Memory leak](#memory-leak)
+  - [GDI leak](#gdi-leak)
+  - [Handle leak](#handle-leak)
+  - [Thread spam](#thread-spam)
+  - [Write to NULL-pointer](#write-to-null-pointer)
+  - [Free of non allocated memory](#free-of-non-allocated-memory)
+
 #### Endless loop
 Endless CPU consuming, GUI freezing loop
 ```
