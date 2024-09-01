@@ -22,8 +22,8 @@ Icon for the app: Modified icon "gear" from Game icon pack by Kenney Vleugels (w
   - [GDI leak](#gdi-leak)
   - [Handle leak](#handle-leak)
   - [Thread spam](#thread-spam)
-  - [Write to NULL-pointer](#write-to-null-pointer)
   - [Free of non allocated memory](#free-of-non-allocated-memory)
+  - [Write to NULL-pointer](#write-to-null-pointer)
 
 #### Endless loop
 Endless CPU consuming, GUI freezing loop
@@ -166,19 +166,6 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
 }
 ```
 
-#### Write to NULL-pointer
-Write to address 0
-```
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    char* pszTest = NULL;
-    ...
-    case IDM_NULLACCESS:
-        pszTest[0] = ' '; // Fault
-    ...
-}
-```
-
 #### Free of non allocated memory
 Free memory that is not allocated
 ```
@@ -193,6 +180,20 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
         ...
 }
 ```
+
+#### Write to NULL-pointer
+Write to address 0
+```
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    char* pszTest = NULL;
+    ...
+    case IDM_NULLACCESS:
+        pszTest[0] = ' '; // Fault
+    ...
+}
+```
+
 ### Development environment
 Visual Studio 2022
 
