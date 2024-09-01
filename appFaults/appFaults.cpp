@@ -18,7 +18,7 @@
   20240813, Remove unneeded spaces, Change manifest for dpi PerMonitorV2
   20240814, Add deadlock
   20240814, Add progress bar as a "GUI is alive" indicator
-  20240816, Remote progress bar with clock
+  20240816, Replace progress bar with clock
 
 ===================================================================+*/
 
