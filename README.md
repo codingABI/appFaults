@@ -116,6 +116,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 }
 ```
 
+#### Handle leak
+Endless creation of handles and freeze GUI.
+```
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    ...
+    case IDM_HANDLELEAK:
+        while (true) OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId()); // Fault
+        ...
+} 
+```
+
 #### GDI leak
 Endless creation of GDI objects and freeze GUI.
 ```
@@ -127,18 +139,6 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                                 CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, L"Arial"); // Fault
         ...
 }
-```
-
-#### Handle leak
-Endless creation of handles and freeze GUI.
-```
-LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
-{
-    ...
-    case IDM_HANDLELEAK:
-        while (true) OpenProcess(PROCESS_ALL_ACCESS, FALSE, GetCurrentProcessId()); // Fault
-        ...
-} 
 ```
 
 #### Thread spam
