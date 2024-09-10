@@ -195,7 +195,10 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 ```
 
 ### Development environment
+
 Visual Studio 2022
+
+The Code works without special frameworks and uses only the Win32 API.
 
 ### Digitally signed binaries
 The compiled EXE files are digitally signed with my public key 
