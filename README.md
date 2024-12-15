@@ -218,6 +218,6 @@ Do not run code/binaries, you dont trust!
 **cmd.exe** is started for fault [External process deadlock](#external-process-deadlock) as an example for an external process that could locks appFaults. 
 
 #### What is the option "Register for application restart"?
-This open can be set in the window menu (also known as the system menu or the control menu). When enabled  this application
+This option can be set in the window menu (also known as the system menu or the control menu). When enabled  this application
 will be restarted automatically by the  Windows Error Reporting (WER) if the application has been running for at least 60 seconds 
 before encountering an unhandled exception (For example [Write to NULL-pointer](#write-to-null-pointer)).
