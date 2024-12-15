@@ -6,7 +6,7 @@
              The tool can be used to show or debug the effects of programming errors
              Use at your own risk!
 
-             Program should run on Windows 11/10/8.1/2022/2019/2016/2012R2
+             Program should run on Windows 11/10/8.1/2025/2022/2019/2016/2012R2
 
   License: CC0
   Copyright (c) 2024 codingABI
@@ -19,6 +19,7 @@
   20240814, Add deadlock
   20240814, Add progress bar as a "GUI is alive" indicator
   20240816, Replace progress bar with clock
+  20241215, Add option for RegisterApplicationRestart
 
 ===================================================================+*/
 
@@ -69,6 +70,7 @@ HWND g_hStatusBar = NULL;
 HANDLE g_semaphore = NULL;
 HWND g_hLastFocus = NULL;
 HWND g_hWnd = NULL;
+BOOL g_registeredForRestart = FALSE;
 
 // Function declarations
 ATOM                MyRegisterClass(HINSTANCE hInstance);
@@ -390,6 +392,7 @@ void createControls(HWND hWindow)
     HMENU hSysMenu = GetSystemMenu(hWindow, FALSE);
     if (hSysMenu != NULL) {
         InsertMenu(hSysMenu, -1, MF_BYPOSITION, MF_SEPARATOR, NULL); // Seperator
+        InsertMenu(hSysMenu, -1, MF_BYPOSITION | MF_STRING | (g_registeredForRestart ? MF_CHECKED : 0), (UINT)IDM_REGISTERRESTART, LoadStringAsWstr(g_hInst, IDS_REGISTERRESTART).c_str()); // Register for restart
         InsertMenu(hSysMenu, -1, MF_BYPOSITION, (UINT)IDM_ABOUT, LoadStringAsWstr(g_hInst, IDS_ABOUT).c_str()); // About
     }
 }
@@ -554,6 +557,21 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case IDM_ABOUT:
                 showProgramInformation(hWnd);
                 break;
+            case IDM_REGISTERRESTART: // Toogle restart registration
+            {
+                g_registeredForRestart = !g_registeredForRestart;
+
+                // Sysmenu entry
+                HMENU hSysMenu = GetSystemMenu(hWnd, FALSE);
+                if (hSysMenu != NULL) {
+                    ModifyMenu(hSysMenu, IDM_REGISTERRESTART, MF_BYCOMMAND| MF_STRING | (g_registeredForRestart ? MF_CHECKED : 0), (UINT)IDM_REGISTERRESTART, LoadStringAsWstr(g_hInst, IDS_REGISTERRESTART).c_str()); // Register for restart
+                }
+                if (g_registeredForRestart)
+                    RegisterApplicationRestart(NULL, 0);
+                else
+                    UnregisterApplicationRestart();
+                break;
+            }
             default:
                 return DefWindowProc(hWnd, message, wParam, lParam);
         }

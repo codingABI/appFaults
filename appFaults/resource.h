@@ -23,6 +23,7 @@
 #define IDS_EXTERNALDEADLOCK            122
 #define IDI_APPICON48                   123
 #define IDR_MAINFRAME                   128
+#define IDS_REGISTERRESTART             129
 #define IDC_STATUSBAR                   1000
 #define IDC_TOOLBAR                     1001
 #define IDC_PROGRESSBAR                 1002
@@ -39,6 +40,7 @@
 #define IDM_DEADLOCK                    1013
 #define IDM_EXTERNALDEADLOCK            1014
 #define IDT_TIMER500MS                  1015
+#define IDM_REGISTERRESTART             1016
 #define IDC_STATIC                      -1
 
 // Next default values for new objects
@@ -46,7 +48,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_NO_MFC                     1
-#define _APS_NEXT_RESOURCE_VALUE        129
+#define _APS_NEXT_RESOURCE_VALUE        130
 #define _APS_NEXT_COMMAND_VALUE         32771
 #define _APS_NEXT_CONTROL_VALUE         1003
 #define _APS_NEXT_SYMED_VALUE           111
