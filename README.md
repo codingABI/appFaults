@@ -220,4 +220,4 @@ Do not run code/binaries, you dont trust!
 #### What is the option "Register for application restart"?
 This option can be set in the window menu (also known as the system menu or the control menu). When enabled  this application
 will be restarted automatically by the  Windows Error Reporting (WER) if the application has been running for at least 60 seconds 
-before encountering an unhandled exception (For example [Write to NULL-pointer](#write-to-null-pointer)).
+and encountering an unhandled exception (For example [Write to NULL-pointer](#write-to-null-pointer)).
