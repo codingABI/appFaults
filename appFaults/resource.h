@@ -24,6 +24,7 @@
 #define IDI_APPICON48                   123
 #define IDR_MAINFRAME                   128
 #define IDS_REGISTERRESTART             129
+#define IDS_LOCKCLIPBOARD               130
 #define IDC_STATUSBAR                   1000
 #define IDC_TOOLBAR                     1001
 #define IDC_PROGRESSBAR                 1002
@@ -39,8 +40,9 @@
 #define IDM_ABOUT                       1012
 #define IDM_DEADLOCK                    1013
 #define IDM_EXTERNALDEADLOCK            1014
-#define IDT_TIMER500MS                  1015
-#define IDM_REGISTERRESTART             1016
+#define IDM_LOCKCLIPBOARD               1015
+#define IDT_TIMER500MS                  1016
+#define IDM_REGISTERRESTART             1017
 #define IDC_STATIC                      -1
 
 // Next default values for new objects

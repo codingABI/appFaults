@@ -9,7 +9,7 @@
              Program should run on Windows 11/10/8.1/2025/2022/2019/2016/2012R2
 
   License: CC0
-  Copyright (c) 2024 codingABI
+  Copyright (c) 2024-2026 codingABI
 
   Icon for the app: Modified icon "gear" from Game icon pack by Kenney Vleugels (www.kenney.nl), https://kenney.nl/assets/game-icons, CC0
 
@@ -20,6 +20,7 @@
   20240814, Add progress bar as a "GUI is alive" indicator
   20240816, Replace progress bar with clock
   20241215, Add option for RegisterApplicationRestart
+  20261028, Add clipboard lock
 
 ===================================================================+*/
 
@@ -38,24 +39,26 @@
 
 // Struct for an automatically generated button
 typedef struct {
-    PVOID dwResourceID; // Resource ID for button
+    DWORD dwResourceID; // Resource ID for button
     DWORD dwResourceStringID; // Resource string as button text
 } AUTOBUTTON;
 
 // List of automatically generated buttons
-#define MAXAUTOBUTTONS 11
+#define MAXAUTOBUTTONS 12
 AUTOBUTTON g_autoButtons[MAXAUTOBUTTONS] = {
-    { (PVOID) IDM_LOOP,IDS_LOOP },
-    { (PVOID) IDM_LOOPTHREAD,IDS_LOOPTHREAD},
-    { (PVOID) IDM_DEADLOCK,IDS_DEADLOCK },
-    { (PVOID) IDM_EXTERNALDEADLOCK,IDS_EXTERNALDEADLOCK },
-    { (PVOID) IDM_LOCK10S,IDS_LOCK10S },
-    { (PVOID) IDM_MEMORYLEAK,IDS_MEMORYLEAK },
-    { (PVOID) IDM_HANDLELEAK,IDS_HANDLELEAK },
-    { (PVOID) IDM_GDILEAK,IDS_GDILEAK },
-    { (PVOID) IDM_THREADSPAM,IDS_THREADSPAM },
-    { (PVOID) IDM_FREEINVALID,IDS_FREEINVALID },
-    { (PVOID) IDM_NULLACCESS,IDS_NULLACCESS}
+    { IDM_LOOP,IDS_LOOP },
+    { IDM_LOOPTHREAD,IDS_LOOPTHREAD},
+    { IDM_DEADLOCK,IDS_DEADLOCK },
+    { IDM_EXTERNALDEADLOCK,IDS_EXTERNALDEADLOCK },
+    { IDM_LOCK10S,IDS_LOCK10S },
+    { IDM_MEMORYLEAK,IDS_MEMORYLEAK },
+    { IDM_HANDLELEAK,IDS_HANDLELEAK },
+    { IDM_GDILEAK,IDS_GDILEAK },
+    { IDM_THREADSPAM,IDS_THREADSPAM },
+    { IDM_FREEINVALID,IDS_FREEINVALID },
+    { IDM_NULLACCESS,IDS_NULLACCESS },
+    { IDM_LOCKCLIPBOARD,IDS_LOCKCLIPBOARD }
+
 };
 
 // Windows size in 96 dpi
@@ -310,7 +313,7 @@ void resizeControls(HWND hWindow) {
     int iPosY = iMargin + (iClientHeight - iStatusBarHeight -
         (MAXAUTOBUTTONS * (iMargin + MulDiv(iButtonHeight_96DPI, uDpi, USER_DEFAULT_SCREEN_DPI)) + iMargin)) / 2;
     for (int i = 0; i < MAXAUTOBUTTONS; i++) {
-        HWND hButton = GetDlgItem(hWindow, (int) g_autoButtons[i].dwResourceID);
+        HWND hButton = GetDlgItem(hWindow, g_autoButtons[i].dwResourceID);
         if (hButton != NULL) {
             // Set font for button
             SendMessage(hButton, WM_SETFONT, (WPARAM)g_hFont, MAKELPARAM(TRUE, 0));
@@ -662,6 +665,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                 case IDM_GDILEAK:
                     while (true) CreateFont(48, 0, 0, 0, FW_DONTCARE, FALSE, TRUE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
                         CLIP_DEFAULT_PRECIS, CLEARTYPE_QUALITY, VARIABLE_PITCH, L"Arial"); // Fault
+                    break;
+                case IDM_LOCKCLIPBOARD:
+                    while (!OpenClipboard(hWnd)); // CloseClipboard() is missing afterwards
                     break;
                 default:
                     return DefWindowProc(hWnd, message, wParam, lParam);

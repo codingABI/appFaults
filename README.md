@@ -24,6 +24,7 @@ Icon for the app: Modified icon "gear" from Game icon pack by Kenney Vleugels (w
   - [Thread spam](#thread-spam)
   - [Free of non allocated memory](#free-of-non-allocated-memory)
   - [Write to NULL-pointer](#write-to-null-pointer)
+  - [Lock clipboard](#lock-clipboard)
 
 #### Endless loop
 Endless CPU consuming, GUI freezing loop
@@ -190,6 +191,18 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
     ...
     case IDM_NULLACCESS:
         pszTest[0] = ' '; // Fault
+    ...
+}
+```
+
+#### Lock clipboard
+Open clipboard, but does not close it
+```
+LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    ...
+    case IDM_LOCKCLIPBOARD:
+        while(!OpenClipBoard(hWND); // CloseClipboard() is missing afterwards
     ...
 }
 ```
