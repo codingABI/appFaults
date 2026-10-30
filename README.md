@@ -1,4 +1,4 @@
-# appFaults
+# appFaults ![Icon](appFaults/appFaults.ico)
 Test/stress tool for Microsoft Windows that creates typical application faults, like a memory leak, freezes ...
 The tool can be used to show or debug the effects of programming errors. Use at your own risk!
 
