@@ -5,7 +5,7 @@ The tool can be used to show or debug the effects of programming errors. Use at 
 ![Screenshot of main window](assets/images/appFaults.png)
 
 ## License and copyright
-This project is licensed under the terms of the CC0 [Copyright (c) 2024 codingABI](LICENSE). 
+This project is licensed under the terms of the CC0 [Copyright (c) 2024-2026 codingABI](LICENSE). 
 
 Icon for the app: Modified icon "gear" from Game icon pack by Kenney Vleugels (www.kenney.nl), https://kenney.nl/assets/game-icons, CC0
 
@@ -98,7 +98,7 @@ Delay that prevents the processing of window messages (=> Freeze GUI) for a long
 LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
     ...
-    case IDM_LOCK10S:
+    case IDM_LOCK60S:
         Sleep(60000); // Fault
         ...
 }
@@ -209,7 +209,8 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
 ### Development environment
 
-Visual Studio 2022
+- Visual Studio 2022 or
+- Dev-C++ 6.3
 
 The Code works without special frameworks and uses only the Win32 API.
 
@@ -221,6 +222,18 @@ The compiled EXE files [x64](appFaults/x64)/[x86](appFaults/x86) are digitally s
 To run the program only the single EXE file is needed.
 
 Do not run code/binaries, you dont trust!
+
+### Command line program arguments
+
+```
+appFaults.exe [/us] | [/v | /?]
+```
+
+| Argument | Description |
+| --- | --- |
+| /us | Limit gui language to US |
+| /v | Show version information |
+| /? | Show program arguments |
 
 ### FAQ
 

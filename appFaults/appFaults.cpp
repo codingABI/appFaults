@@ -1,4 +1,3 @@
-
 /*+===================================================================
   File:      appFaults.cpp
 
@@ -21,24 +20,53 @@
   20240816, Replace progress bar with clock
   20241215, Add option for RegisterApplicationRestart
   20261028, Add clipboard lock
+  20261030, Add program arguments for /us, /?, /v
+            Add compile support for Dev-C++ 6.3
 
 ===================================================================+*/
 
-#include "framework.h"
-#include "resource.h"
+#if defined(__GNUC__)
+// GCC has no project settings -> define Unicode and the target Windows version here
+#ifndef UNICODE
+#define UNICODE
+#endif
+#ifndef _UNICODE
+#define _UNICODE
+#endif
+#ifndef _WIN32_WINNT
+#define _WIN32_WINNT 0x0602 // Windows 8: TaskDialog, NOTIFYICON_VERSION_4, NIF_SHOWTIP, ...
+#endif
+#ifndef WINVER
+#define WINVER _WIN32_WINNT
+#endif
+#endif
+
+// Includes
+#define WIN32_LEAN_AND_MEAN
+#define NOMINMAX
+#include <windows.h>
 #include <string>
 #include <commctrl.h>
 #include <shellapi.h>
 #include <process.h>
+#include <shlwapi.h>
 #include <ShellScalingApi.h>
+#include <uxtheme.h>
+#include "resource.h"
 
 // Add libs (for Visual Studio)
 #pragma comment(lib,"comctl32.lib")
 #pragma comment(lib,"shcore.lib")
 #pragma comment(lib,"Version.lib")
+#pragma comment(lib,"Shlwapi.lib")
+
+#ifndef DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
+#define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 -4
+#endif
 
 // Struct for an automatically generated button
 typedef struct {
+	std::wstring sPrefix; // Prefix/symbol
     DWORD dwResourceID; // Resource ID for button
     DWORD dwResourceStringID; // Resource string as button text
 } AUTOBUTTON;
@@ -46,19 +74,18 @@ typedef struct {
 // List of automatically generated buttons
 #define MAXAUTOBUTTONS 12
 AUTOBUTTON g_autoButtons[MAXAUTOBUTTONS] = {
-    { IDM_LOOP,IDS_LOOP },
-    { IDM_LOOPTHREAD,IDS_LOOPTHREAD},
-    { IDM_DEADLOCK,IDS_DEADLOCK },
-    { IDM_EXTERNALDEADLOCK,IDS_EXTERNALDEADLOCK },
-    { IDM_LOCK10S,IDS_LOCK10S },
-    { IDM_MEMORYLEAK,IDS_MEMORYLEAK },
-    { IDM_HANDLELEAK,IDS_HANDLELEAK },
-    { IDM_GDILEAK,IDS_GDILEAK },
-    { IDM_THREADSPAM,IDS_THREADSPAM },
-    { IDM_FREEINVALID,IDS_FREEINVALID },
-    { IDM_NULLACCESS,IDS_NULLACCESS },
-    { IDM_LOCKCLIPBOARD,IDS_LOCKCLIPBOARD }
-
+    { L"\u2941 ",IDM_LOOP,IDS_LOOP },
+    { L"\u27BF ",IDM_LOOPTHREAD,IDS_LOOPTHREAD},
+    { L"\u2639 ",IDM_DEADLOCK,IDS_DEADLOCK },
+    { L"\u2601 ",IDM_EXTERNALDEADLOCK,IDS_EXTERNALDEADLOCK },
+    { L"\u23F1 ",IDM_LOCK60S,IDS_LOCK60S },
+    { L"\u2610 ",IDM_MEMORYLEAK,IDS_MEMORYLEAK },
+    { L"\u26EE ",IDM_HANDLELEAK,IDS_HANDLELEAK },
+    { L"\u2FF4 ",IDM_GDILEAK,IDS_GDILEAK },
+    { L"\u22C8 ",IDM_THREADSPAM,IDS_THREADSPAM },
+    { L"\u262E ",IDM_FREEINVALID,IDS_FREEINVALID },
+    { L"\u270E ",IDM_NULLACCESS,IDS_NULLACCESS },
+    { L"\U0001F4CB ",IDM_LOCKCLIPBOARD,IDS_LOCKCLIPBOARD }
 };
 
 // Windows size in 96 dpi
@@ -119,17 +146,18 @@ UINT MyGetDpiForWindow(HWND hWindow) {
   Summary:  Get resource string as wstring
 
   Args:     HINSTANCE hInstance
-              Handle to instance module
-            UINT uID
-              Resource ID
+			  Handle to instance module
+			UINT uID
+			  Resource ID
 
   Returns:  std::wstring
 
 -----------------------------------------------------------------F-F*/
-std::wstring LoadStringAsWstr(HINSTANCE hInstance, UINT uID) {
-    PCWSTR pws;
-    int cchStringLength = LoadStringW(hInstance, uID, reinterpret_cast<LPWSTR>(&pws), 0);
-    if (cchStringLength > 0) return std::wstring(pws, cchStringLength); else return std::wstring();
+std::wstring LoadStringAsWstr(HINSTANCE hInstance, UINT uID)
+{
+	PCWSTR pws;
+	int cchStringLength = LoadStringW(hInstance, uID, reinterpret_cast<LPWSTR>(&pws), 0);
+	if (cchStringLength > 0) return std::wstring(pws, cchStringLength); else return std::wstring();
 }
 
 /*F+F+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
@@ -145,6 +173,7 @@ std::wstring LoadStringAsWstr(HINSTANCE hInstance, UINT uID) {
 -----------------------------------------------------------------F-F*/
 void showProgramInformation(HWND hWindow) {
     std::wstring sTitle(LoadStringAsWstr(g_hInst, IDS_APP_TITLE));
+	std::wstring sMessage(LoadStringAsWstr(g_hInst, IDS_PROGINFO));
     wchar_t szExecutable[MAX_PATH];
     GetModuleFileName(NULL, szExecutable, MAX_PATH);
 
@@ -177,9 +206,8 @@ void showProgramInformation(HWND hWindow) {
         delete[] verData;
     }
 
-    MessageBox(hWindow, LoadStringAsWstr(g_hInst, IDS_PROGINFO).c_str(), sTitle.c_str(), MB_ICONINFORMATION | MB_OK);
+    MessageBox(hWindow,  sMessage.c_str(), sTitle.c_str(), MB_ICONINFORMATION | MB_OK);
 }
-
 
 /*F+F+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   Function: threadLoop
@@ -363,7 +391,7 @@ void createControls(HWND hWindow)
     for (int i = 0; i < MAXAUTOBUTTONS; i++) {
         HWND hwndButton = CreateWindow(
             L"BUTTON",
-            LoadStringAsWstr(g_hInst, g_autoButtons[i].dwResourceStringID).c_str(),
+            std::wstring(g_autoButtons[i].sPrefix).append(LoadStringAsWstr(g_hInst, g_autoButtons[i].dwResourceStringID)).c_str(),
             WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_TEXT | BS_VCENTER,
             0, 0, 0, 0, // Size will be set later
             hWindow,
@@ -401,6 +429,105 @@ void createControls(HWND hWindow)
 }
 
 /*F+F+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  Function: EnableDpiAwareness
+
+  Summary:   Set DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 or failback to SetProcessDPIAware
+
+  Args:     
+
+  Returns:
+
+-----------------------------------------------------------------F-F*/
+void EnableDpiAwareness()
+{
+    typedef BOOL(WINAPI* PFN_SetCtx)(HANDLE);
+    HMODULE hUser = GetModuleHandleW(L"user32.dll");
+    PFN_SetCtx setCtx = hUser
+        ? reinterpret_cast<PFN_SetCtx>(GetProcAddress(hUser, "SetProcessDpiAwarenessContext"))
+        : nullptr;
+    // DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 (Windows 10 1703 or later)
+    if (setCtx && setCtx(reinterpret_cast<HANDLE>(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)))
+        return;
+    SetProcessDPIAware(); // Fallback for older windows versions
+}
+
+/*F+F+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  Function: showProgramArguments
+
+  Summary:   Show program arguments message box
+
+  Args:     HWND hWindow
+			  Handle to main window
+
+  Returns:
+
+-----------------------------------------------------------------F-F*/
+void showProgramArguments(HWND hWindow)
+{
+	std::wstring sTitle(LoadStringAsWstr(g_hInst, IDS_APP_TITLE));
+	wchar_t szFullPath[MAX_PATH] = L"";
+    if (GetModuleFileName(NULL, szFullPath, MAX_PATH) == 0) return;
+	std::wstring sMain = PathFindFileName(szFullPath);
+	sMain.append(L" [/us] | [/v | /?]\n\n");
+	sMain
+		.append(L"/us Limit gui language to US\n")
+		.append(L"/v Show version information\n")
+		.append(L"/? Show this dialog");
+
+	MessageBox(hWindow, sMain.c_str(), sTitle.c_str(), MB_ICONINFORMATION | MB_OK);
+}
+
+/*F+F+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+  Function: checkArguments
+
+  Summary:   Check program arguments
+
+  Args:
+
+  Returns:  BOOL
+			  TRUE = Keep program running
+			  FALSE = Exit wWinMain afterwards
+
+-----------------------------------------------------------------F-F*/
+BOOL checkArguments()
+{
+	int argc;
+	LPWSTR* argv = CommandLineToArgvW(GetCommandLine(), &argc);
+	BOOL bExit = FALSE;
+
+	if (argv == NULL) {
+		OutputDebugString(L"Argv fails");
+		return FALSE;
+	}
+    
+	for (int i = 0; i < argc; i++)
+	{
+		if (_wcsicmp(argv[i], L"/us") == 0) {
+		    SetThreadUILanguage(MAKELANGID(LANG_ENGLISH, SUBLANG_ENGLISH_US)); // Limit gui language to US
+		}
+		if (_wcsicmp(argv[i], L"/v") == 0)
+		{
+			showProgramInformation(NULL);
+			bExit = TRUE;
+			break;
+		}
+
+		if (_wcsicmp(argv[i], L"/?") == 0)
+		{
+			showProgramArguments(NULL);
+			bExit = TRUE;
+			break;
+		}
+	}
+
+	LocalFree(argv);
+
+	if (bExit) return FALSE; // Exit wWinMain afterwards
+
+	return TRUE; // Keep wWinMain running
+}
+
+/*F+F+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   Function: wWinMain
 
   Summary:   Process window messages of main window
@@ -415,16 +542,23 @@ void createControls(HWND hWindow)
               1 = error
 
 -----------------------------------------------------------------F-F*/
+#if defined(__GNUC__)
+int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
+#else
 int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
                      _In_opt_ HINSTANCE hPrevInstance,
                      _In_ LPWSTR    lpCmdLine,
                      _In_ int       nCmdShow)
+#endif
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    SetProcessDpiAwarenessContext(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2);
-
+    EnableDpiAwareness();
+    
+    	// Arguments
+	if (!checkArguments()) return 0;
+	
     MyRegisterClass(hInstance);
 
     // Enables controls from Comctl32.dll, like status bar ...
@@ -638,7 +772,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 
                     break;
                 }
-                case IDM_LOCK10S:
+                case IDM_LOCK60S:
                     Sleep(60000); // Fault
                     break;
                 case IDM_MEMORYLEAK:
