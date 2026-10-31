@@ -117,7 +117,7 @@ LRESULT CALLBACK    WndProc(HWND, UINT, WPARAM, LPARAM);
    'Der Prozedureinsprungpunkt "GetDpiForWindow" wurde in der DLL "...exe" nicht gefunden. '
    a.k.a. 'The procedure entry point "GetDpiForWindow" could not be located in the dynamic link library "...exe"'
    My workaround is MyGetDpiForWindow
-   
+
    Args:     WND hWindow
                Handle to window
 
@@ -229,7 +229,7 @@ unsigned int __stdcall threadLoop(void* data) {
 /*F+F+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   Function: threadWaitForever
 
-  Summary:   Faulty thread functions, that waits forever 
+  Summary:   Faulty thread functions, that waits forever
 
   Args:     void* data
               Unused
@@ -335,7 +335,7 @@ void resizeControls(HWND hWindow) {
 
     // Resize automatically generated buttons
     int iButtonHeight_96DPI = MulDiv(HIWORD(units), 14, 8);
-    int iMargin = ((iClientHeight - iStatusBarHeight) 
+    int iMargin = ((iClientHeight - iStatusBarHeight)
         - MAXAUTOBUTTONS * MulDiv(iButtonHeight_96DPI, uDpi, USER_DEFAULT_SCREEN_DPI))
         / (MAXAUTOBUTTONS + 1);
     int iPosY = iMargin + (iClientHeight - iStatusBarHeight -
@@ -361,7 +361,7 @@ void resizeControls(HWND hWindow) {
     statwidths[0] = 3* iClientWidth/4;
     statwidths[1] = -1;
     SendMessage(g_hStatusBar, SB_SETPARTS, sizeof(statwidths) / sizeof(int), (LPARAM)statwidths);
-    
+
     InvalidateRect(hWindow, NULL, TRUE); // Force window content update
 }
 
@@ -429,29 +429,6 @@ void createControls(HWND hWindow)
 }
 
 /*F+F+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
-  Function: EnableDpiAwareness
-
-  Summary:   Set DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 or failback to SetProcessDPIAware
-
-  Args:     
-
-  Returns:
-
------------------------------------------------------------------F-F*/
-void EnableDpiAwareness()
-{
-    typedef BOOL(WINAPI* PFN_SetCtx)(HANDLE);
-    HMODULE hUser = GetModuleHandleW(L"user32.dll");
-    PFN_SetCtx setCtx = hUser
-        ? reinterpret_cast<PFN_SetCtx>(GetProcAddress(hUser, "SetProcessDpiAwarenessContext"))
-        : nullptr;
-    // DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 (Windows 10 1703 or later)
-    if (setCtx && setCtx(reinterpret_cast<HANDLE>(DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2)))
-        return;
-    SetProcessDPIAware(); // Fallback for older windows versions
-}
-
-/*F+F+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++
   Function: showProgramArguments
 
   Summary:   Show program arguments message box
@@ -499,7 +476,7 @@ BOOL checkArguments()
 		OutputDebugString(L"Argv fails");
 		return FALSE;
 	}
-    
+
 	for (int i = 0; i < argc; i++)
 	{
 		if (_wcsicmp(argv[i], L"/us") == 0) {
@@ -554,11 +531,9 @@ int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
     UNREFERENCED_PARAMETER(hPrevInstance);
     UNREFERENCED_PARAMETER(lpCmdLine);
 
-    EnableDpiAwareness();
-    
-    	// Arguments
+    // Arguments
 	if (!checkArguments()) return 0;
-	
+
     MyRegisterClass(hInstance);
 
     // Enables controls from Comctl32.dll, like status bar ...
@@ -649,11 +624,11 @@ BOOL InitInstance(HINSTANCE hInstance, int nCmdShow)
    g_hWnd = CreateWindowW(
        L"MainWndClass",
        LoadStringAsWstr(g_hInst, IDS_APP_TITLE).c_str(),
-       WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX, 
-       CW_USEDEFAULT, 
-       CW_USEDEFAULT, 
-       WINDOWWIDTH_96DPI, 
-       WINDOWHEIGHT_96DPI, 
+       WS_OVERLAPPED|WS_CAPTION|WS_SYSMENU|WS_MINIMIZEBOX,
+       CW_USEDEFAULT,
+       CW_USEDEFAULT,
+       WINDOWWIDTH_96DPI,
+       WINDOWHEIGHT_96DPI,
        nullptr, nullptr, hInstance, nullptr);
 
    if (!g_hWnd)
@@ -749,7 +724,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     si.cb = sizeof(si);
                     ZeroMemory(&pi, sizeof(pi));
 
-                    // Start the child process. 
+                    // Start the child process.
                     if (CreateProcess(NULL,   // No module name (use command line)
                         szCommand,        // Command line
                         NULL,           // Process handle not inheritable
@@ -757,7 +732,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         FALSE,          // Set handle inheritance to FALSE
                         0,              // No creation flags
                         NULL,           // Use parent's environment block
-                        NULL,           // Use parent's starting directory 
+                        NULL,           // Use parent's starting directory
                         &si,            // Pointer to STARTUPINFO structure
                         &pi)           // Pointer to PROCESS_INFORMATION structure
                         )
@@ -765,7 +740,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         // Wait until child process exits.
                         WaitForSingleObject(pi.hProcess, INFINITE); // Fault
 
-                        // Close process and thread handles. 
+                        // Close process and thread handles.
                         CloseHandle(pi.hProcess);
                         CloseHandle(pi.hThread);
                     }
