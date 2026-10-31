@@ -29,7 +29,7 @@ IncludeVersionInfo=1
 SupportXPThemes=0
 CompilerSet=0
 CompilerSettings=0;0;0;0;0;0;5;0;0;0;0;0;0;0;0;0;0;0;0;0;0;1;0;0;0;0
-UnitCount=4
+UnitCount=3
 
 [VersionInfo]
 Major=1
@@ -42,7 +42,7 @@ CompanyName=codingABI
 FileVersion=1.0.0.3
 FileDescription=Test/stress tool
 InternalName=
-LegalCopyright=Copyright (C) 2024-2026 codingABI
+LegalCopyright=© 2024-2026 codingABI
 LegalTrademarks=
 OriginalFilename=appFaults.exe
 ProductName=appFaults
@@ -60,24 +60,15 @@ Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
 
-[Unit2]
-FileName=appFaults.h
-CompileCpp=1
+[Unit3]
+FileName=resource.h
 Folder=
 Compile=1
 Link=1
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=
-
-[Unit3]
-FileName=appFaults.rc
-Folder=Resources
-Compile=1
-Link=0
-Priority=1000
-OverrideBuildCmd=0
-BuildCmd=
+CompileCpp=1
 
 [Unit5]
 FileName=resource.h
@@ -105,6 +96,15 @@ CompileCpp=1
 Folder=
 Compile=1
 Link=1
+Priority=1000
+OverrideBuildCmd=0
+BuildCmd=
+
+[Unit2]
+FileName=appFaults.rc
+Folder=Resources
+Compile=1
+Link=0
 Priority=1000
 OverrideBuildCmd=0
 BuildCmd=

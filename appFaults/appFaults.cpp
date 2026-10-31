@@ -21,7 +21,7 @@
   20241215, Add option for RegisterApplicationRestart
   20261028, Add clipboard lock
   20261030, Add program arguments for /us, /?, /v
-            Add compile support for Dev-C++ 6.3
+            Add compiler support for Dev-C++ 6.3
 
 ===================================================================+*/
 
@@ -59,10 +59,6 @@
 #pragma comment(lib,"shcore.lib")
 #pragma comment(lib,"Version.lib")
 #pragma comment(lib,"Shlwapi.lib")
-
-#ifndef DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2
-#define DPI_AWARENESS_CONTEXT_PER_MONITOR_AWARE_V2 -4
-#endif
 
 // Struct for an automatically generated button
 typedef struct {
@@ -251,7 +247,7 @@ unsigned int __stdcall threadWaitForever(void* data) {
   Args:     HWND hWindow
               Handle to main window
             RECT* prcNewWindow
-              Pointer to RECT structur to new size and position
+              Pointer to RECT structure to new size and position
               NULL = Resize to initial window size
 
   Returns:
@@ -395,7 +391,7 @@ void createControls(HWND hWindow)
             WS_TABSTOP | WS_VISIBLE | WS_CHILD | BS_PUSHBUTTON | BS_TEXT | BS_VCENTER,
             0, 0, 0, 0, // Size will be set later
             hWindow,
-            (HMENU)(g_autoButtons[i].dwResourceID),
+            (HMENU)(INT_PTR)(g_autoButtons[i].dwResourceID),
             g_hInst,
             NULL);
         if (hwndButton != NULL) {
@@ -422,7 +418,7 @@ void createControls(HWND hWindow)
     // Sysmenu entry
     HMENU hSysMenu = GetSystemMenu(hWindow, FALSE);
     if (hSysMenu != NULL) {
-        InsertMenu(hSysMenu, -1, MF_BYPOSITION, MF_SEPARATOR, NULL); // Seperator
+        InsertMenu(hSysMenu, -1, MF_BYPOSITION, MF_SEPARATOR, NULL); // Separator
         InsertMenu(hSysMenu, -1, MF_BYPOSITION | MF_STRING | (g_registeredForRestart ? MF_CHECKED : 0), (UINT)IDM_REGISTERRESTART, LoadStringAsWstr(g_hInst, IDS_REGISTERRESTART).c_str()); // Register for restart
         InsertMenu(hSysMenu, -1, MF_BYPOSITION, (UINT)IDM_ABOUT, LoadStringAsWstr(g_hInst, IDS_ABOUT).c_str()); // About
     }
@@ -488,7 +484,6 @@ BOOL checkArguments()
 			bExit = TRUE;
 			break;
 		}
-
 		if (_wcsicmp(argv[i], L"/?") == 0)
 		{
 			showProgramArguments(NULL);
@@ -522,10 +517,7 @@ BOOL checkArguments()
 #if defined(__GNUC__)
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow)
 #else
-int APIENTRY wWinMain(_In_ HINSTANCE hInstance,
-                     _In_opt_ HINSTANCE hPrevInstance,
-                     _In_ LPWSTR    lpCmdLine,
-                     _In_ int       nCmdShow)
+int APIENTRY wWinMain(_In_ HINSTANCE hInstance, _In_opt_ HINSTANCE hPrevInstance, _In_ LPWSTR lpCmdLine, _In_ int nCmdShow)
 #endif
 {
     UNREFERENCED_PARAMETER(hPrevInstance);
@@ -594,10 +586,10 @@ ATOM MyRegisterClass(HINSTANCE hInstance)
     wcex.hInstance      = hInstance;
     wcex.hIcon          = LoadIcon(hInstance, MAKEINTRESOURCE(IDI_APPFAULTS)); // Icon for taskbar and explorer (icon for explorer seems to be the icon resource with the lowest ID)
     wcex.hCursor        = LoadCursor(nullptr, IDC_ARROW);
-    wcex.hbrBackground = (HBRUSH)CreateSolidBrush(RGB(255,0,0)); // Background color to red
-    wcex.lpszMenuName = L"MainMenu";
-    wcex.lpszClassName = L"MainWndClass";
-    wcex.hIconSm = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_APPICON16)); // Small icon for window caption
+    wcex.hbrBackground  = (HBRUSH)CreateSolidBrush(RGB(255,0,0)); // Background color to red
+    wcex.lpszMenuName   = L"MainMenu";
+    wcex.lpszClassName  = L"MainWndClass";
+    wcex.hIconSm        = LoadIcon(wcex.hInstance, MAKEINTRESOURCE(IDI_APPICON16)); // Small icon for window caption
 
     return RegisterClassExW(&wcex);
 }
@@ -669,7 +661,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
             case IDM_ABOUT:
                 showProgramInformation(hWnd);
                 break;
-            case IDM_REGISTERRESTART: // Toogle restart registration
+            case IDM_REGISTERRESTART: // Toggle restart registration
             {
                 g_registeredForRestart = !g_registeredForRestart;
 
@@ -725,8 +717,9 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                     ZeroMemory(&pi, sizeof(pi));
 
                     // Start the child process.
-                    if (CreateProcess(NULL,   // No module name (use command line)
-                        szCommand,        // Command line
+                    if (CreateProcess(
+                        NULL,           // No module name (use command line)
+                        szCommand,      // Command line
                         NULL,           // Process handle not inheritable
                         NULL,           // Thread handle not inheritable
                         FALSE,          // Set handle inheritance to FALSE
@@ -734,7 +727,7 @@ LRESULT CALLBACK WndProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
                         NULL,           // Use parent's environment block
                         NULL,           // Use parent's starting directory
                         &si,            // Pointer to STARTUPINFO structure
-                        &pi)           // Pointer to PROCESS_INFORMATION structure
+                        &pi)            // Pointer to PROCESS_INFORMATION structure
                         )
                     {
                         // Wait until child process exits.

@@ -5,7 +5,7 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 
 /////////////////////////////////////////////////////////////////////////////
 //
-// Icon
+// Icons
 //
 
 // Icon with lowest ID value placed first to ensure application icon
@@ -16,7 +16,6 @@ IDI_APPICON16               ICON                    "gear16.ico"
 IDI_APPICON32               ICON                    "gear32.ico"
 IDI_APPICON48               ICON                    "gear48.ico"
 IDI_APPICON64               ICON                    "gear64.ico"
-
 
 VS_VERSION_INFO VERSIONINFO
 FILEVERSION 1, 0, 0, 3
@@ -30,7 +29,7 @@ BEGIN
 			VALUE "FileDescription", "Test/stress tool"
 			VALUE "FileVersion", "1.0.0.3"
 			VALUE "InternalName", "appFaults.exe"
-			VALUE "LegalCopyright", "Copyright (C) 2024-2026 codingABI"
+			VALUE "LegalCopyright", "© 2024-2026 codingABI"
 			VALUE "OriginalFilename", "appFaults.exe"
 			VALUE "ProductName", "appFaults"
 			VALUE "ProductVersion", "1.0.0.3"
@@ -64,7 +63,7 @@ BEGIN
     IDS_HANDLELEAK          "Handle leak"
     IDS_NULLACCESS          "Write to NULL-pointer"
     IDS_FREEINVALID         "Free of non allocated memory"
-    IDS_PROGINFO            "Test/stress tool\nUse at your own risk\n\nhttps://github.com/codingABI/appFaults\n\n©2024-2026 codingABI"
+    IDS_PROGINFO            "Test/stress tool\nUse at your own risk\n\n©2024-2026 codingABI\n\nhttps://github.com/codingABI/appFaults"
     IDS_APPWARNING          "Use at your own risk!"
     IDS_LOOPTHREADS         "endless loop threads"
     IDS_MEMORYLEAKWARING    "Sure? Your computer may become inoperable as a result"
@@ -102,7 +101,7 @@ BEGIN
     IDS_HANDLELEAK          "Handle-Leck"
     IDS_NULLACCESS          "Schreibzugriff auf NULL-Pointer"
     IDS_FREEINVALID         "free von nicht allokiertem Speicher"
-    IDS_PROGINFO            "Test/Stress Tool\nBenutzung auf eigenes Risiko\n\nhttps://github.com/codingABI/appFaults\n\n©2024-2026 codingABI"
+    IDS_PROGINFO            "Test/Stress Tool\nBenutzung auf eigenes Risiko\n\n©2024-2026 codingABI\n\nhttps://github.com/codingABI/appFaults"
     IDS_APPWARNING          "Benutzung auf eigenes Risiko!"
     IDS_LOOPTHREADS         "Endlosschleifen-Threads"
     IDS_MEMORYLEAKWARING    "Sicher? Ihr Rechner kann dadurch unbedienbar werden."
